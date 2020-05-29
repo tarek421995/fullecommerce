@@ -17,7 +17,7 @@ from .models import BillingProfile, Card
 
 def payment_method_view(request):
     #next_url = 
-    # if request.user.is_authenticated():
+    # if request.user.is_authenticated:
     #     billing_profile = request.user.billingprofile
     #     my_customer_id = billing_profile.customer_id
 

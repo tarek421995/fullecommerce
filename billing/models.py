@@ -19,7 +19,7 @@ class BillingProfileManager(models.Manager):
         guest_email_id = request.session.get('guest_email_id')
         created = False
         obj = None
-        if user.is_authenticated():
+        if user.is_authenticated:
             'logged in user checkout; remember payment stuff'
             obj, created = self.model.objects.get_or_create(
                             user=user, email=user.email)
@@ -181,7 +181,7 @@ class ChargeManager(models.Manager):
 
 
 class Charge(models.Model):
-    billing_profile         = models.ForeignKey(BillingProfile)
+    billing_profile         = models.ForeignKey(BillingProfile,on_delete=models.CASCADE)
     stripe_id               = models.CharField(max_length=120)
     paid                    = models.BooleanField(default=False)
     refunded                = models.BooleanField(default=False)

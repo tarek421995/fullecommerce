@@ -8,3 +8,4 @@ urlpatterns = [
     url(r'^$', SearchProductView.as_view(), name='query'),
 ]
 
+app_name = 'search'

@@ -13,3 +13,4 @@ urlpatterns = [
     url(r'^checkout/$', checkout_home, name='checkout'),
     url(r'^update/$', cart_update, name='update'),
 ]
+app_name = 'carts'
