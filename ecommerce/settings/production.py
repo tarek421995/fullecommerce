@@ -27,7 +27,17 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'tarek421995@gmail.com' 
+EMAIL_HOST_PASSWORD = 'tarekeesa0993587879'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFUALT_FROM_EMAIL = "tarek Ecommerce <tarek421995@gmail.com>"
 
+MANAGERS = (
+    ("tarek eesa" ,"tarek421995@gmail.com")
+    ) 
+ADMINS = MANAGERS
 # Application definition
 
 INSTALLED_APPS = [
