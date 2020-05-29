@@ -53,7 +53,7 @@ object_viewed_signal.connect(object_viewed_receiver)
 
 
 class UserSession(models.Model):
-    user                = models.ForeignKey(User, blank=True, null=True) # User instance instance.id
+    user                = models.ForeignKey(User, blank=True, null=True,on_delete=models.CASCADE) # User instance instance.id
     ip_address          = models.CharField(max_length=220, blank=True, null=True) #IP Field
     session_key         = models.CharField(max_length=100, blank=True, null=True) #min 50
     timestamp           = models.DateTimeField(auto_now_add=True)
