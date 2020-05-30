@@ -25,17 +25,20 @@ SECRET_KEY = '@!-)jwmuzh8btr380g61=g+#&zzei&dz2(&=xbvxztady)_p(r'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'tarek421995@gmail.com' 
-EMAIL_HOST_PASSWORD = 'tarekeesa0993587879'
+EMAIL_HOST_USER = 'tarekeesa7@gmail.com' 
+EMAIL_HOST_PASSWORD = 'tarekeesa12345'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-DEFUALT_FROM_EMAIL = "tarek Ecommerce <tarek421995@gmail.com>"
+DEFUALT_FROM_EMAIL = "tarek Ecommerce <tarekeesa7@gmail.com>"
+BASE_URL = "localhost:8000"
+
+DEFAULT_ACTIVATION_DAYS = 7
 
 MANAGERS = (
-    ("tarek eesa" ,"tarek421995@gmail.com")
+    ("tarek eesa" ,"tarekeesa7@gmail.com")
     ) 
 ADMINS = MANAGERS
 
@@ -56,7 +59,7 @@ INSTALLED_APPS = [
     'analytics',
     'billing',
     'carts',
-    #'marketing',
+    # 'marketing',
     'orders',
     'products',
     'search',
@@ -65,6 +68,9 @@ INSTALLED_APPS = [
 
 AUTH_USER_MODEL = 'accounts.User' #changes the built-in user model to ours
 
+LOGIN_URL = '/login/'
+LOGIN_URL_REDIRECT = '/'
+LOGOUT_URL = '/logout/'
 
 FORCE_SESSION_TO_ONE = False
 FORCE_INACTIVE_USER_ENDSESSION= False
@@ -85,7 +91,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-LOGOUT_REDIRECT_URL = '/login/'
 ROOT_URLCONF = 'ecommerce.urls'
 
 TEMPLATES = [

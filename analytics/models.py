@@ -16,6 +16,22 @@ FORCE_SESSION_TO_ONE = getattr(settings, 'FORCE_SESSION_TO_ONE', False)
 FORCE_INACTIVE_USER_ENDSESSION= getattr(settings, 'FORCE_INACTIVE_USER_ENDSESSION', False)
 
 
+class ObjectViewedQuerySet(models.query.QuerySet):
+    def by_model(self, model_class, model_queryset=False):
+        c_type = ContentType.objects.get_for_model(model_class)
+        qs = self.filter(content_type=c_type)
+        if model_queryset:
+            viewed_ids = [x.object_id for x in qs]
+            return model_class.objects.filter(pk__in=viewed_ids)
+        return qs
+
+class ObjectViewedManager(models.Manager):
+    def get_queryset(self):
+        return ObjectViewedQuerySet(self.model, using=self._db)
+
+    def by_model(self, model_class, model_queryset=False):
+        return self.get_queryset().by_model(model_class, model_queryset=model_queryset)
+    
 class ObjectViewed(models.Model):
     user                = models.ForeignKey(User, blank=True, null=True,on_delete=models.CASCADE) # User instance instance.id
     ip_address          = models.CharField(max_length=220, blank=True, null=True) #IP Field
@@ -23,6 +39,8 @@ class ObjectViewed(models.Model):
     object_id           = models.PositiveIntegerField() # User id, Product id, Order id,
     content_object      = GenericForeignKey('content_type', 'object_id') # Product instance
     timestamp           = models.DateTimeField(auto_now_add=True)
+
+    objects = ObjectViewedManager()
 
     def __str__(self):
         return "%s viewed on %s" %(self.content_object, self.timestamp)
@@ -35,11 +53,11 @@ class ObjectViewed(models.Model):
 
 def object_viewed_receiver(sender, instance, request, *args, **kwargs):
     c_type = ContentType.objects.get_for_model(sender) # instance.__class__
-    user = None 
+    user = None
     if request.user.is_authenticated:
-        user = request.user    
+        user = request.user
     new_view_obj = ObjectViewed.objects.create(
-                user = request.user,
+                user = user,
                 content_type=c_type,
                 object_id=instance.id,
                 ip_address = get_client_ip(request)

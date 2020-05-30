@@ -9,7 +9,7 @@ User = settings.AUTH_USER_MODEL
 # user abc@teamcfe.com -- 1 billing profile
 
 import stripe
-stripe.api_key = "sk_test_cu1lQmcg1OLffhLvYrSCp5XE"
+stripe.api_key = "sk_test_gUTaF86UOxxedSn4UJzc65BN00ZCIJcKCS"
 
 
 

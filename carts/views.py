@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect
 from accounts.forms import LoginForm, GuestForm
 from accounts.models import GuestEmail
 
-from addresses.forms import AddressForm
+from addresses.forms import AddressCheckoutForm
 from addresses.models import Address
 
 from billing.models import BillingProfile
@@ -16,8 +16,8 @@ from .models import Cart
 
 
 import stripe
-STRIPE_SECRET_KEY = getattr(settings, "STRIPE_SECRET_KEY", "sk_test_cu1lQmcg1OLffhLvYrSCp5XE")
-STRIPE_PUB_KEY =  getattr(settings, "STRIPE_PUB_KEY", 'pk_test_PrV61avxnHaWIYZEeiYTTVMZ')
+STRIPE_SECRET_KEY = getattr(settings, "STRIPE_SECRET_KEY", "sk_test_gUTaF86UOxxedSn4UJzc65BN00ZCIJcKCS")
+STRIPE_PUB_KEY =  getattr(settings, "STRIPE_PUB_KEY", 'pk_test_AZ3wZ3jTwtXUyNyrmWzQix1800A9kl1yUp')
 stripe.api_key = STRIPE_SECRET_KEY
 
 
@@ -76,9 +76,9 @@ def checkout_home(request):
     if cart_created or cart_obj.products.count() == 0:
         return redirect("cart:home")  
     
-    login_form = LoginForm()
-    guest_form = GuestForm()
-    address_form = AddressForm()
+    login_form = LoginForm(request=request)
+    guest_form = GuestForm(request=request)
+    address_form = AddressCheckoutForm()
     billing_address_id = request.session.get("billing_address_id", None)
     shipping_address_id = request.session.get("shipping_address_id", None)
 
