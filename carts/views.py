@@ -16,8 +16,8 @@ from .models import Cart
 
 
 import stripe
-STRIPE_SECRET_KEY = getattr(settings, "STRIPE_SECRET_KEY", "sk_test_gUTaF86UOxxedSn4UJzc65BN00ZCIJcKCS")
-STRIPE_PUB_KEY =  getattr(settings, "STRIPE_PUB_KEY", 'pk_test_AZ3wZ3jTwtXUyNyrmWzQix1800A9kl1yUp')
+STRIPE_SECRET_KEY = getattr(settings, "STRIPE_SECRET_KEY", "sk_test_cu1lQmcg1OLffhLvYrSCp5XE")
+STRIPE_PUB_KEY =  getattr(settings, "STRIPE_PUB_KEY", 'pk_test_PrV61avxnHaWIYZEeiYTTVMZ')
 stripe.api_key = STRIPE_SECRET_KEY
 
 
@@ -80,6 +80,10 @@ def checkout_home(request):
     guest_form = GuestForm(request=request)
     address_form = AddressCheckoutForm()
     billing_address_id = request.session.get("billing_address_id", None)
+
+    shipping_address_required = not cart_obj.is_digital
+
+
     shipping_address_id = request.session.get("shipping_address_id", None)
 
     billing_profile, billing_profile_created = BillingProfile.objects.new_or_get(request)
@@ -105,7 +109,7 @@ def checkout_home(request):
         if is_prepared:
             did_charge, crg_msg = billing_profile.charge(order_obj)
             if did_charge:
-                order_obj.mark_paid()
+                order_obj.mark_paid() # sort a signal for us
                 request.session['cart_items'] = 0
                 del request.session['cart_id']
                 if not billing_profile.user:
@@ -126,6 +130,7 @@ def checkout_home(request):
         "address_qs": address_qs,
         "has_card": has_card,
         "publish_key": STRIPE_PUB_KEY,
+        "shipping_address_required": shipping_address_required,
     }
     return render(request, "carts/checkout.html", context)
 
