@@ -1,0 +1,4 @@
+<form method='POST' action="{% url 'store:add_store' %}"> {% csrf_token %}
+  {{ form.as_p }}
+  <button type='submit' class='btn btn-default'>Submit</button>
+</form>

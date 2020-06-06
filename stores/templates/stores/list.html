@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+        <div class='row'>
+          <div class='col'>
+            <p>
+            {% for store in obj %}
+
+                <h3>{{ store.title}}</h3>
+                <!-- <h5>{{ store.location}}</h5> -->
+                <a href="{{ store.get_absolute_url }}" class="btn btn-primary">View {{ store.title }}</a>
+                <p>{% for product in store.products.all %}
+                     {{ product.counter }}
+                     {{ product }}
+                </p>
+                {% endfor %}
+
+             {% endfor %}
+        
+
+          </p>
+        </div>
+</div>
+
+{% endblock %}

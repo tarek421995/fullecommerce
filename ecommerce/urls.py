@@ -55,6 +55,7 @@ urlpatterns = [
     url(r'^checkout/address/reuse/$', checkout_address_reuse_view, name='checkout_address_reuse'),
     url(r'^register/guest/$', GuestRegisterView.as_view(), name='guest_register'),
     url(r'^logout/$', LogoutView.as_view(), name='logout'),
+    url(r'^store/', include("stores.urls", namespace='store')),
     url(r'^api/cart/$', cart_detail_api_view, name='api-cart'),
     url(r'^cart/', include("carts.urls", namespace='cart')),
     url(r'^billing/payment-method/$', payment_method_view, name='billing-payment-method'),
