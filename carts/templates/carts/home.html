@@ -10,7 +10,9 @@
     <tr>
       <th>#</th>
       <th>Product Name</th>
-      <th>Product Price</th>
+      <th>Product singel Price</th>
+      <th>Product multiable Price </th>
+      <th>Product quantity</th>
     </tr>
   </thead>
   <tbody class='cart-body'>
@@ -21,18 +23,28 @@
         {% include 'carts/snippets/remove-product.html' with product_id=product.id %}
       </td>
       <td>{{ product.price }}</td>
+      <td>{{ product.quantity_price }}</td>
+      <td>
+          <a href="{% url 'products:remove-single-item-from-cart' product.slug %}"><h4> - </h4></a>
+               {{ product.quantity }}
+          <a href="{% url 'products:add-to-cart' product.slug %}"> <h5> + </h5> </a>
+      </td>
+
     </tr>
     {% endfor %}
     <tr>
       <td colspan="2"></td>
+      <td></td>
       <td><b>Subtotal</b> $<span class='cart-subtotal'>{{ cart.subtotal }}</span></td>
     </tr>
     <tr>
       <td colspan="2"></td>
+      <td></td>
       <td><b>Total</b> $<span class='cart-total'>{{ cart.total }}</span></td>
     </tr>
     <tr>
       <td colspan="2"></td>
+      <td></td>
       <td><a class='btn btn-lg btn-success' href='{% url "cart:checkout" %}'>Checkout</a></td>
     </tr>
 

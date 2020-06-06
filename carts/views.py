@@ -51,20 +51,32 @@ def cart_update(request):
         cart_obj, new_obj = Cart.objects.new_or_get(request)
         if product_obj in cart_obj.products.all():
             cart_obj.products.remove(product_obj)
+            final_price = 0
+            # cart_obj.subtotal = product.quantity_price
+            for product in cart_obj.products.all():
+                final_price += product.price * product.quantity
+            cart_obj.subtotal = final_price
+            cart_obj.save()
             added = False
         else:
             cart_obj.products.add(product_obj) # cart_obj.products.add(product_id)
+            final_price = 0
+            # cart_obj.subtotal = product.quantity_price
+            for product in cart_obj.products.all():
+                final_price += product.price * product.quantity
+            cart_obj.subtotal = final_price
+            cart_obj.save() 
             added = True
         request.session['cart_items'] = cart_obj.products.count()
         # return redirect(product_obj.get_absolute_url())
-        if request.is_ajax(): # Asynchronous JavaScript And XML / JSON
-            print("Ajax request")
-            json_data = {
-                "added": added,
-                "removed": not added,
-                "cartItemCount": cart_obj.products.count()
-            }
-            return JsonResponse(json_data, status=200) # HttpResponse
+        # if request.is_ajax(): # Asynchronous JavaScript And XML / JSON
+        #     print("Ajax request")
+        #     json_data = {
+        #         "added": added,
+        #         "removed": not added,
+        #         "cartItemCount": cart_obj.products.count()
+        #     }
+        #     return JsonResponse(json_data, status=200) # HttpResponse
             # return JsonResponse({"message": "Error 400"}, status=400) # Django Rest Framework
     return redirect("cart:home")
 

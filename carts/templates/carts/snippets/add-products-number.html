@@ -1,6 +1,0 @@
-<form  method='POST' action="{% url 'cart:add_cart'  %}" data-endpoint="{% url 'cart:add_cart'  %}" class="form"> {% csrf_token %}
-    <input class='cart-item-product-id' type='hidden' name='product_id' value='{{ product_id }}' />
-      <button type='submit' class='btn btn-link btn-sm' style="padding:0px;cursor: pointer;">+</button>
-    </span>
-</form>
-

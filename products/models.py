@@ -75,6 +75,8 @@ class Product(models.Model):
     active          = models.BooleanField(default=True)
     timestamp       = models.DateTimeField(auto_now_add=True)
     is_digital      = models.BooleanField(default=False) # User Library
+    quantity        = models.IntegerField(default=1)
+    quantity_price  = models.DecimalField(decimal_places=2, max_digits=20,default=0)
 
     objects = ProductManager()
 
@@ -92,10 +94,20 @@ class Product(models.Model):
     def name(self):
         return self.title
 
+
     def get_downloads(self):
         qs = self.productfile_set.all()
         return qs
 
+    # def get_add_to_cart_url(self):
+    # return reverse("products:add-to-cart", kwargs={
+    #     'slug': self.slug
+    # })
+
+    # def get_remove_from_cart_url(self):
+    #     return reverse("products:remove-from-cart", kwargs={
+    #         'slug': self.slug
+    #     })
 
 def product_pre_save_receiver(sender, instance, *args, **kwargs):
     if not instance.slug:

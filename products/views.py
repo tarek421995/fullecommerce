@@ -1,6 +1,7 @@
 # from django.views import ListView
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.views.generic import ListView, DetailView, View
 from django.shortcuts import render, get_object_or_404, redirect
@@ -11,6 +12,57 @@ from carts.models import Cart
 
 from .models import Product, ProductFile
 
+
+def remove_single_item_from_cart(request, slug):
+    # product = Cart.products.(product, slug=slug)
+    cart_obj, new_obj = Cart.objects.new_or_get(request)
+    product_obj =  Product.objects.get(slug=slug)
+    # print (product)
+    # product_obj = Product.objects.get(id=product_id)
+
+    product_obj.quantity -=1
+    product_obj.quantity_price = product_obj.quantity*product_obj.price
+    product_obj.save()
+    print (product_obj.quantity_price)
+    final_price = 0
+    # cart_obj.subtotal = product.quantity_price
+    for product in cart_obj.products.all():
+        final_price += product.price * product.quantity
+
+    cart_obj.subtotal = final_price
+
+    cart_obj.save()
+
+    return redirect("cart:home")
+
+def add_to_cart(request, slug):
+    cart_obj, new_obj = Cart.objects.new_or_get(request)
+
+    product_obj =  Product.objects.get(slug=slug) 
+   
+    product_obj.quantity +=1
+    product_obj.quantity_price = product_obj.quantity*product_obj.price
+    product_obj.save()
+    print (product_obj.quantity_price)
+    final_price = 0
+    for product in cart_obj.products.all():
+        final_price += product.price * product.quantity
+
+    cart_obj.subtotal = final_price
+
+
+        # if product_obj.slug == product.slug:
+        #     cart_obj.subtotal = cart_obj.subtotal + product_obj.quantity_price
+
+    print (product_obj.price)
+    cart_obj.save()
+    
+    print (cart_obj.products.all())
+        
+
+
+    # Cart.save()
+    return redirect("cart:home")
 
 class ProductFeaturedListView(ListView):
     template_name = "products/list.html"
