@@ -19,6 +19,7 @@ import stripe
 STRIPE_SECRET_KEY = getattr(settings, "STRIPE_SECRET_KEY", "sk_test_cu1lQmcg1OLffhLvYrSCp5XE")
 STRIPE_PUB_KEY =  getattr(settings, "STRIPE_PUB_KEY", 'pk_test_PrV61avxnHaWIYZEeiYTTVMZ')
 stripe.api_key = STRIPE_SECRET_KEY
+STRIPE_PUBLISHABLE_KEY = getattr(settings, "STRIPE_PUBLISHABLE_KEY", 'pk_test_AZ3wZ3jTwtXUyNyrmWzQix1800A9kl1yUp')
 
 
 
@@ -36,7 +37,11 @@ def cart_detail_api_view(request):
 
 def cart_home(request):
     cart_obj, new_obj = Cart.objects.new_or_get(request)
-    return render(request, "carts/home.html", {"cart": cart_obj})
+    context = {
+       "cart": cart_obj
+       # "key": STRIPE_PUBLISHABLE_KEY,
+    }
+    return render(request, "carts/home.html", context)
 
 
 def cart_update(request):
@@ -69,26 +74,29 @@ def cart_update(request):
             added = True
         request.session['cart_items'] = cart_obj.products.count()
         # return redirect(product_obj.get_absolute_url())
-        # if request.is_ajax(): # Asynchronous JavaScript And XML / JSON
-        #     print("Ajax request")
-        #     json_data = {
-        #         "added": added,
-        #         "removed": not added,
-        #         "cartItemCount": cart_obj.products.count()
-        #     }
-        #     return JsonResponse(json_data, status=200) # HttpResponse
-            # return JsonResponse({"message": "Error 400"}, status=400) # Django Rest Framework
+        if request.is_ajax(): # Asynchronous JavaScript And XML / JSON
+            print("Ajax request")
+            json_data = {
+                "added": added,
+                "removed": not added,
+                "cartItemCount": cart_obj.products.count()
+            }
+            return JsonResponse(json_data, status=200) # HttpResponse
+            return JsonResponse({"message": "Error 400"}, status=400) # Django Rest Framework
     return redirect("cart:home")
 
 
 
 def checkout_home(request):
+    print ('check out')
     cart_obj, cart_created = Cart.objects.new_or_get(request)
+    print (cart_obj)
     order_obj = None
     if cart_created or cart_obj.products.count() == 0:
         return redirect("cart:home")  
     
     login_form = LoginForm(request=request)
+    print (login_form)
     guest_form = GuestForm(request=request)
     address_form = AddressCheckoutForm()
     billing_address_id = request.session.get("billing_address_id", None)
@@ -97,7 +105,7 @@ def checkout_home(request):
 
 
     shipping_address_id = request.session.get("shipping_address_id", None)
-
+    print (shipping_address_id)
     billing_profile, billing_profile_created = BillingProfile.objects.new_or_get(request)
     address_qs = None
     has_card = False

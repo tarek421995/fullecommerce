@@ -7,6 +7,7 @@ from django.db import models
 from django.db.models import Q
 from django.db.models.signals import pre_save, post_save
 from django.urls import reverse
+from accounts.models import Seller
 
 # from ecommerce.aws.download.utils import AWSDownload
 # from ecommerce.aws.utils import ProtectedS3Storage
@@ -70,13 +71,16 @@ class Product(models.Model):
     slug            = models.SlugField(blank=True, unique=True)
     description     = models.TextField()
     price           = models.DecimalField(decimal_places=2, max_digits=20, default=39.99)
+    fee             = models.PositiveIntegerField(default=50)
     image           = models.ImageField(upload_to=upload_image_path, null=True, blank=True)
+    seller          = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
     featured        = models.BooleanField(default=False)
     active          = models.BooleanField(default=True)
     timestamp       = models.DateTimeField(auto_now_add=True)
     is_digital      = models.BooleanField(default=False) # User Library
     quantity        = models.IntegerField(default=1)
     quantity_price  = models.DecimalField(decimal_places=2, max_digits=20,default=0)
+    
 
     objects = ProductManager()
 

@@ -64,14 +64,16 @@ AUTH_USER_MODEL = 'accounts.User' #changes the built-in user model to ours
 LOGIN_URL = '/login/'
 LOGIN_URL_REDIRECT = '/'
 LOGOUT_URL = '/logout/'
+LOGOUT_REDIRECT_URL = '/'
+
 FORCE_SESSION_TO_ONE = False
 FORCE_INACTIVE_USER_ENDSESSION= False
 
 
-
+STRIPE_PUBLISHABLE_KEY = 'pk_test_AZ3wZ3jTwtXUyNyrmWzQix1800A9kl1yUp'
 STRIPE_SECRET_KEY = "sk_test_gUTaF86UOxxedSn4UJzc65BN00ZCIJcKCS"
 STRIPE_PUB_KEY = 'pk_test_AZ3wZ3jTwtXUyNyrmWzQix1800A9kl1yUp'
-
+STRIPE_CONNECT_CLIENT_ID = 'ca_HR6fKmpUhhQ6UPMhp2XNltzEqvCMwFP0'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

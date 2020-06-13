@@ -3,9 +3,10 @@ from django.conf import settings
 from django.urls import reverse
 from django.db import models
 from django.db.models import Q
+from django.dispatch import receiver
 from django.db.models.signals import pre_save, post_save
 from django.contrib.auth.models import (
-    AbstractBaseUser, BaseUserManager
+    AbstractBaseUser, BaseUserManager ,PermissionsMixin
 )
 
 from django.core.mail import send_mail
@@ -54,13 +55,14 @@ class UserManager(BaseUserManager):
         return user
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser ,PermissionsMixin):
     email       = models.EmailField(max_length=255, unique=True)
     full_name   = models.CharField(max_length=255, blank=True, null=True)
     is_active   = models.BooleanField(default=True) # can login 
     staff       = models.BooleanField(default=False) # staff user non superuser
     admin       = models.BooleanField(default=False) # superuser 
     timestamp   = models.DateTimeField(auto_now_add=True)
+    is_seller = models.BooleanField(default=False)
     # confirm     = models.BooleanField(default=False)
     # confirmed_date     = models.DateTimeField(default=False)
 
@@ -98,6 +100,42 @@ class User(AbstractBaseUser):
     # @property
     # def is_active(self):
     #     return self.active
+
+
+
+class Seller(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    stripe_user_id = models.CharField(max_length=255, blank=True)
+    stripe_access_token = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return self.user.email
+
+
+class Buyer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.user.email
+
+
+@receiver(post_save, sender=User)
+def user_save(sender, instance, created, **kwargs):
+    if created:
+        if instance.is_seller:
+            Seller.objects.create(user=instance)
+        else:
+            Buyer.objects.create(user=instance)
+    if not created:
+        user_id = instance.id
+        is_buyer = Buyer.objects.filter(user=user_id).first()
+        is_seller = Seller.objects.filter(user=user_id).first()
+        if instance.is_seller and is_buyer:
+            is_buyer.delete()
+            Seller.objects.create(user=instance)
+        if not instance.is_seller and is_seller:
+            is_seller.delete()
+            Buyer.objects.create(user=instance)
 
 
 class EmailActivationQuerySet(models.query.QuerySet):

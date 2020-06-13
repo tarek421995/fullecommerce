@@ -29,6 +29,7 @@ def StoreDetailSlugView(request, id):
     
 
 def add_store_view(request):
+
     form = AddStoreForm(request.POST or None) 
     context = {
         "form": form

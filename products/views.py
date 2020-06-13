@@ -2,15 +2,53 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect,JsonResponse
 from django.views.generic import ListView, DetailView, View
 from django.shortcuts import render, get_object_or_404, redirect
 
 from analytics.mixins import ObjectViewedMixin
-
+from django.conf import settings
 from carts.models import Cart
+import json
 
+import stripe
 from .models import Product, ProductFile
+from .forms import AddProductForm
+from stores.models import Store
+from accounts.forms import LoginForm, GuestForm
+
+
+def add_product_view(request):
+    form = AddProductForm(request.POST or None)
+    login_form = LoginForm(request)
+
+    if request.user.is_authenticated:    
+        context = {
+            "form": form,
+            "loginForm": login_form,
+         }   
+        stores = Store.objects.get(user=request.user or None)
+        if form.is_valid(): # All validation rules pass
+                # Process the data in form.cleaned_data
+                # ...
+                
+                title         = request.POST.get('title')
+                description   = request.POST.get('description')
+                price         = request.POST.get('price')
+                image         = request.POST.get('image')
+                featured      = request.POST.get('featured')
+                product_add   = Product(title=title,description=description, price=price,image=image)
+                product_add.save()
+                stores.products.add(product_add)
+                stores.save()
+                return redirect("/products/")
+    else:
+        context = {
+            "loginForm": login_form,
+         } 
+
+
+    return render(request, "products/add_product.html", context)   
 
 
 def remove_single_item_from_cart(request, slug):
@@ -132,23 +170,89 @@ class ProductDetailSlugView(ObjectViewedMixin, DetailView):
         context = super(ProductDetailSlugView, self).get_context_data(*args, **kwargs)
         cart_obj, new_obj = Cart.objects.new_or_get(self.request)
         context['cart'] = cart_obj
+        context['key'] = settings.STRIPE_PUBLISHABLE_KEY
         return context
 
     def get_object(self, *args, **kwargs):
         request = self.request
         slug = self.kwargs.get('slug')
 
+    # def render_to_response(self, context, **response_kwargs):
+    #     if not self.request.user.is_authenticated:
+    #         return HttpResponseRedirect(reverse('login'))
+    #     return super(ProductDetailSlugView, self).render_to_response(context, **response_kwargs)
+
         #instance = get_object_or_404(Product, slug=slug, active=True)
+        if self.request.user.is_authenticated:
+            try:
+                instance = Product.objects.get(slug=slug, active=True)
+            except Product.DoesNotExist:
+                raise Http404("Not found..")
+            except Product.MultipleObjectsReturned:
+                qs = Product.objects.filter(slug=slug, active=True)
+                instance = qs.first()
+            except:
+                raise Http404("Uhhmmm ")
+            return instance
+        else:
+            try:
+                instance = Product.objects.get(slug=slug, active=True)
+            except Product.DoesNotExist:
+                raise Http404("Not found..")
+            except Product.MultipleObjectsReturned:
+                qs = Product.objects.filter(slug=slug, active=True)
+                instance = qs.first()
+            except:
+                raise Http404("Uhhmmm ")
+            return instance
+# helpers
+
+def get_or_create_customer(email, token, stripe_access_token, stripe_account):
+    stripe.api_key = stripe_access_token
+    connected_customers = stripe.Customer.list()
+    for customer in connected_customers:
+        if customer.email == email:
+            print(f'{email} found')
+            return customer
+    print(f'{email} created')
+    return stripe.Customer.create(
+        email=email,
+        source=token,
+        stripe_account=stripe_account,
+    )
+
+class ProductChargeView(View):
+    def post(self, request, *args, **kwargs):
+        stripe.api_key = settings.STRIPE_SECRET_KEY
+        json_data = json.loads(request.body)
+        product = Product.objects.filter(id=json_data['product_id']).first()
+        fee_percentage = .01 * int(product.fee)
+        print(fee_percentage)
         try:
-            instance = Product.objects.get(slug=slug, active=True)
-        except Product.DoesNotExist:
-            raise Http404("Not found..")
-        except Product.MultipleObjectsReturned:
-            qs = Product.objects.filter(slug=slug, active=True)
-            instance = qs.first()
-        except:
-            raise Http404("Uhhmmm ")
-        return instance
+            customer = get_or_create_customer(
+                self.request.user.email,
+                json_data['token'],
+                product.seller.stripe_access_token,
+                product.seller.stripe_user_id,
+                
+            )
+            charge = stripe.Charge.create(
+                amount=json_data['amount'],
+                currency='usd',
+                customer=customer.id,
+                description=json_data['description'],
+                application_fee=int(json_data['amount'] * fee_percentage),
+                stripe_account=product.seller.stripe_user_id,
+
+            )
+            if charge:
+                print ('customer created')
+                print(product.seller)
+                return JsonResponse({'status': 'success'}, status=202)
+        except stripe.error.StripeError as e:
+            return JsonResponse({'status': 'error'}, status=500)
+
+
 
 import os
 from wsgiref.util import FileWrapper # this used in django
@@ -266,3 +370,25 @@ def product_detail_view(request, pk=None, *args, **kwargs):
         'object': instance
     }
     return render(request, "products/detail.html", context)
+
+
+
+# class ProductChargeView(View):
+
+#     def post(self, request, *args, **kwargs):
+#         print ('charging .....')
+#         stripe.api_key = settings.STRIPE_SECRET_KEY
+#         json_data = json.loads(request.body)
+#         print (json_data)
+#         try:
+#             charge = stripe.Charge.create(
+#                 amount=json_data['amount'],
+#                 currency='usd',
+#                 source=json_data['token'],
+#                 description=json_data['description'],
+#             )
+#             print (charge)
+#             if charge:
+#                 return JsonResponse({'status': 'success'}, status=202)
+#         except stripe.error.StripeError as e:
+#             return JsonResponse({'status': 'error'}, status=500)

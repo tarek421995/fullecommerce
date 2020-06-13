@@ -66,8 +66,39 @@
     </div>
 </div>
 
+{% if user.is_authenticated and user.is_seller %}
+
+<div class='col-12 col-md-3 my-3'>
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">bussnisse</h4>
+        <div class='list-group'>
+                <a class='list-group-item' href='{% url "stores:list" %}'>view other stores</a>
+            </div>
+              <div class='list-group'>
+                <a class='list-group-item' href='{% url "stores:add_store" %}'>add your store now</a>
+            </div>
+            <div class='list-group'>
+                <a class='list-group-item' href='{% url "products:add_product" %}'>add product to your store</a>
+            </div>
+      </div>
+    </div>
+</div>
+{% endif %}
 
 </div>
+<h1 class="title is-size-1">Django Stripe Connect</h1>
+<hr><br>
+{% if user.is_authenticated %}
+  <p class="is-size-6">Welcome, {{ user.email }}!</p>
+  <br>
+  {% if user.is_seller and not user.seller.stripe_user_id %}
+<a href="{% url 'account:authorize' %}" class="button is-info">Connect your Stripe Account</a>
+{% endif %}
+  <a href="{% url 'products:list' %}" class="button is-primary">Purchase A product</a>
+{% else %}
+  <p class="is-size-6">Please <a href="{% url '/login/' %}">log in</a>.</p>
+{% endif %}
 
 
 {% endblock %}

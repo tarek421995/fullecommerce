@@ -118,8 +118,8 @@ $(document).ready(function(){
         method: httpMethod,
         data: data,
         success: function(data){
-          console.log(data)
-          console.log(data.owner)
+          /*console.log(data)*/
+         /* console.log(data.owner)*/
           if (data.owner){
             isOwner = true
             submitSpan.html("<a class='btn btn-warning' href='/library/'>In Library</a>")
@@ -151,6 +151,7 @@ $(document).ready(function(){
 
 
   productForm.submit(function(event){
+      console.log('submitting')
       event.preventDefault();
       // console.log("Form is not sending")
       var thisForm = $(this)
@@ -164,6 +165,7 @@ $(document).ready(function(){
         method: httpMethod,
         data: formData,
         success: function(data){
+          console.log('success')
           var submitSpan = thisForm.find(".submit-span")
           if (data.added){
             submitSpan.html("<div class='btn-group'> <a class='btn btn-link' href='/cart/'>In cart</a> <button type='submit' class='btn btn-link'>Remove?</button></div>")

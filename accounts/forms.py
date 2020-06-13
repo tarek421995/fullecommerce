@@ -8,6 +8,10 @@ User = get_user_model()
 
 from .models import EmailActivation, GuestEmail
 
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+
+from .models import User
+
 
 class ReactivateEmailForm(forms.Form):
     email       = forms.EmailField()
@@ -173,26 +177,39 @@ class LoginForm(forms.Form):
 class RegisterForm(forms.ModelForm):
     """A form for creating new users. Includes all the required
     fields, plus a repeated password."""
-    password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
-    password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
+    password1   = forms.CharField(label='Password', widget=forms.PasswordInput)
+    password2   = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
+    is_seller   = forms.BooleanField()
 
     class Meta:
         model = User
-        fields = ('full_name', 'email',) #'full_name',)
+        fields = ('full_name', 'email','is_seller') #'full_name',)
 
     def clean_password2(self):
         # Check that the two password entries match
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
+        print (self.cleaned_data.get("is_seller"))
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("Passwords don't match")
         return password2
+
+    def as_p(self):
+        "Returns this form rendered as HTML <p>s."
+        return self._html_output(
+            normal_row = '<p%(html_class_attr)s>%(label)s</p> <p>%(field)s%(help_text)s</p>',
+            error_row = '%s',
+            row_ender = '</p>',
+            help_text_html = ' <span class="helptext">%s</span>',
+            errors_on_separate_row = True)
+
 
     def save(self, commit=True):
         # Save the provided password in hashed format
         user = super(RegisterForm, self).save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         user.is_active = False # send confirmation email via signals
+
         # obj = EmailActivation.objects.create(user=user)
         # obj.send_activation_email()
         if commit:

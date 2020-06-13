@@ -85,6 +85,7 @@ pre_save.connect(billing_profile_created_receiver, sender=BillingProfile)
 
 
 def user_created_receiver(sender, instance, created, *args, **kwargs):
+
     if created and instance.email:
         BillingProfile.objects.get_or_create(user=instance, email=instance.email)
 
@@ -139,8 +140,6 @@ def new_card_post_save_receiver(sender, instance, created, *args, **kwargs):
 
 
 post_save.connect(new_card_post_save_receiver, sender=Card)
-
-
 
 # stripe.Charge.create(
 #   amount = int(order_obj.total * 100),
