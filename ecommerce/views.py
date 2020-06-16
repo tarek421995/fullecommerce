@@ -1,10 +1,12 @@
 from django.contrib.auth import authenticate, login, get_user_model
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render,redirect
-
+from stores.models import Store
 from .forms import ContactForm
 
 def home_page(request):
+    
+
     # print(request.session.get("first_name", "Unknown"))
     # request.session['first_name']
     context = {
@@ -13,7 +15,26 @@ def home_page(request):
 
     }
     if request.user.is_authenticated:
-        context["premium_content"] = "YEAHHHHHH"
+
+        context["premium_content"] = "reach a world wide product from any where "
+        if request.user.is_seller:
+            
+            user =request.user
+            print (request.user)
+            try:
+                qs = store.objects.get(user=request.user or none)
+                store = qs.first()
+                id = store.id
+                print (id)
+                print(store)
+                context["has_store"] = "have_one"
+                print (context["has_store"])
+
+            except:
+                context["has_store"] = "create_store"
+                print (context["has_store"])
+        else:
+            context ["has_store"] = "need to create seller account"
     return render(request, "home_page.html", context)
 
 def about_page(request):
