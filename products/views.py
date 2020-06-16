@@ -26,9 +26,12 @@ def add_product_view(request):
         context = {
             "form": form,
             "loginForm": login_form,
-         }   
-        stores = Store.objects.get(user=request.user or None)
-        print (stores)
+         }
+        try:
+            stores = Store.objects.get(user=request.user or None)
+             print (stores)
+        except:
+            pass
         if form.is_valid(): # All validation rules pass
                 # Process the data in form.cleaned_data
                 # ...
